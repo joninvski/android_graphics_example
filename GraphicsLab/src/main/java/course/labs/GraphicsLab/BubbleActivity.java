@@ -500,11 +500,6 @@ public class BubbleActivity extends Activity {
 	}
 
 	private static void log(String message) {
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		Log.i(TAG, message);
 	}
 }
