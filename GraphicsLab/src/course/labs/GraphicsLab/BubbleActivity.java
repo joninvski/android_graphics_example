@@ -153,7 +153,7 @@ public class BubbleActivity extends Activity {
 					bubble.deflect(velocityX, velocityY);
 				}
 
-				return false;
+				return true;
 
 			}
 
@@ -421,8 +421,8 @@ public class BubbleActivity extends Activity {
 			// TODO - set mDx and mDy to be the new velocities divided by the
 			// REFRESH_RATE
 
-			mDx = velocityX / REFRESH_RATE;
-			mDy = velocityY / REFRESH_RATE;
+			mDx = velocityX / (REFRESH_RATE * 10);
+			mDy = velocityY / (REFRESH_RATE * 10);
 
 		}
 
