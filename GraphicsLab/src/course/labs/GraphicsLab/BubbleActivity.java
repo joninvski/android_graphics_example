@@ -7,7 +7,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
-import android.media.AudioManager.OnAudioFocusChangeListener;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.RotateAnimation;
 import android.widget.RelativeLayout;
 
 public class BubbleActivity extends Activity {
@@ -359,8 +357,8 @@ public class BubbleActivity extends Activity {
 					// Otherwise, request that the BubbleView be redrawn.
 					boolean onScreen = !moveWhileOnScreen();
 					if (onScreen) {
-						postInvalidate(); // Does not use invalidate as this is
-											// a non ui thread
+						// postinvalidate because non-ui thread
+						postInvalidate(); 
 					} else {
 						Log.d("MINE", "Bubble out of bounds");
 						stop(false);
