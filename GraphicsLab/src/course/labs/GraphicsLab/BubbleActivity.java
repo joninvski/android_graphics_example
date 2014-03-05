@@ -147,6 +147,12 @@ public class BubbleActivity extends Activity {
 
 				Log.d("MINE", "Some flinged on the screen");
 
+				int numberChilds = mFrame.getChildCount();
+				for (int i = 0; i < numberChilds; i++) {
+					final BubbleView bubble = (BubbleView) mFrame.getChildAt(i);
+					bubble.deflect(velocityX, velocityY);
+				}
+
 				return false;
 
 			}
@@ -415,8 +421,8 @@ public class BubbleActivity extends Activity {
 			// TODO - set mDx and mDy to be the new velocities divided by the
 			// REFRESH_RATE
 
-			mDx = 0;
-			mDy = 0;
+			mDx = velocityX / REFRESH_RATE;
+			mDy = velocityY / REFRESH_RATE;
 
 		}
 
