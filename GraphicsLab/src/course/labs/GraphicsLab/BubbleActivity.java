@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.RotateAnimation;
 import android.widget.RelativeLayout;
 
 public class BubbleActivity extends Activity {
@@ -110,20 +111,10 @@ public class BubbleActivity extends Activity {
 		// TODO - load the sound from res/raw/bubble_pop.wav
 		mSoundID = R.raw.bubble_pop;
 		mSoundPool.load(this, mSoundID, 1);
-	
-		OnAudioFocusChangeListener afChangeListener = new OnAudioFocusChangeListener() {
-			public void onAudioFocusChange(int focusChange) {
-				if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-//					mAudioManager.abandonAudioFocus(afChangeListener);;
-				}
-			}
-		};
-		
-		mAudioManager.requestAudioFocus(afChangeListener,
-				AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
+		mAudioManager.setSpeakerphoneOn(true);
+		mAudioManager.loadSoundEffects();
 	}
-	
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
@@ -180,30 +171,29 @@ public class BubbleActivity extends Activity {
 				float y = event.getY(pointerID);
 
 				boolean popped = false;
-				
+
 				// Lets check out all the bubbles
 				int numberChilds = mFrame.getChildCount();
 				for (int i = 0; i < numberChilds; i++) {
 					final BubbleView bubble = (BubbleView) mFrame.getChildAt(i);
-					
-					if(bubble.intersects(x, y)){
+
+					if (bubble.intersects(x, y)) {
 						Log.d("MINE", "Popped");
 						bubble.stop(true);
 						popped = true;
 					}
 				}
-				
-				if(!popped){
+
+				if (!popped) {
 					addBubble(x, y);
 				}
 
-				return true;				
+				return true;
 			}
 		});
 	}
-	
-	private void addBubble(float x, float y)
-	{
+
+	private void addBubble(float x, float y) {
 		BubbleView child = new BubbleView(getApplicationContext(), x, y);
 		mFrame.addView(child);
 		child.start();
@@ -222,6 +212,13 @@ public class BubbleActivity extends Activity {
 	protected void onPause() {
 
 		// TODO - Release all SoundPool resources
+		if (null != mSoundPool) {
+			mSoundPool.unload(mSoundID);
+			mSoundPool.release();
+			mSoundPool = null;
+		}
+		mAudioManager.setSpeakerphoneOn(false);
+		mAudioManager.unloadSoundEffects();
 
 		super.onPause();
 	}
@@ -274,6 +271,9 @@ public class BubbleActivity extends Activity {
 
 				// TODO - set rotation in range [1..3]
 				mDRotate = 0;
+				int min = 1;
+				int max = 3;
+				mDRotate = (r.nextInt(max - min) + min);
 
 			} else {
 
@@ -306,10 +306,12 @@ public class BubbleActivity extends Activity {
 				// TODO - Set movement direction and speed
 				// Limit movement speed in the x and y
 				// direction to [-3..3].
-				int max = 3;
-				int min = -3;
-				mDx = r.nextInt(max - min) + min;
-				mDy = r.nextInt(max - min) + min;
+				int max = 3 + 1;
+				int min = 0;
+				int direction = r.nextBoolean() ? 1 : -1;
+				mDx = (r.nextInt(max - min) + min) * direction;
+				direction = r.nextBoolean() ? 1 : -1;
+				mDy = (r.nextInt(max - min) + min) * direction;
 			}
 		}
 
@@ -322,7 +324,7 @@ public class BubbleActivity extends Activity {
 			} else {
 
 				// TODO - set scaled bitmap size in range [1..3] * BITMAP_SIZE
-				mScaledBitmapWidth = (r.nextInt(2) + 1) * BITMAP_SIZE;
+				mScaledBitmapWidth = (r.nextInt(3) + 1) * BITMAP_SIZE;
 			}
 
 			// TODO - create the scaled bitmap using size set above
@@ -350,25 +352,25 @@ public class BubbleActivity extends Activity {
 					// stop the BubbleView's Worker Thread.
 					// Otherwise, request that the BubbleView be redrawn.
 					boolean onScreen = !moveWhileOnScreen();
-					if(onScreen){
-						postInvalidate(); // Does not use invalidate as this is a non ui thread
-					}
-					else{
+					if (onScreen) {
+						postInvalidate(); // Does not use invalidate as this is
+											// a non ui thread
+					} else {
 						Log.d("MINE", "Bubble out of bounds");
 						stop(false);
 					}
 				}
-					
+
 			}, 0, REFRESH_RATE, TimeUnit.MILLISECONDS);
 		}
 
 		private synchronized boolean intersects(float x, float y) {
 
 			// TODO - Return true if the BubbleView intersects position (x,y)
-			if(mXPos <= x && x <= mXPos + mScaledBitmapWidth)
-				if(mYPos <= y && y <= mYPos + mScaledBitmapWidth)
+			if (mXPos <= x && x <= mXPos + mScaledBitmapWidth)
+				if (mYPos <= y && y <= mYPos + mScaledBitmapWidth)
 					return true;
-			
+
 			return false;
 		}
 
@@ -387,14 +389,15 @@ public class BubbleActivity extends Activity {
 					public void run() {
 
 						// TODO - Remove the BubbleView from mFrame
-						
+						mFrame.removeView(BubbleView.this);
+
 						if (popped) {
 							log("Pop!");
 
 							// TODO - If the bubble was popped by user,
 							// play the popping sound
 							// Play key click sound
-							mSoundPool.play(mSoundID, mStreamVolume, mStreamVolume,1,0,1);
+							mSoundPool.play(mSoundID, mStreamVolume, mStreamVolume, 1, 0, 1f);
 
 						}
 
@@ -425,8 +428,10 @@ public class BubbleActivity extends Activity {
 			canvas.save();
 
 			// TODO - increase the rotation of the original image by mDRotate
+			mRotate = mRotate + mDRotate;
 
 			// TODO Rotate the canvas by current rotation
+			canvas.rotate(mRotate, mXPos + mScaledBitmapWidth / 2, mYPos + mScaledBitmapWidth / 2);
 
 			// TODO - draw the bitmap at it's new location
 			canvas.drawBitmap(mScaledBitmap, this.mXPos, this.mYPos, null);
@@ -439,10 +444,10 @@ public class BubbleActivity extends Activity {
 
 			// TODO - Move the BubbleView
 			// Returns true if the BubbleView has exited the screen
-			//??
+			// ??
 			this.mXPos = mXPos + mDx;
 			this.mYPos = mYPos + mDy;
-			
+
 			return isOutOfView();
 
 		}
@@ -450,11 +455,11 @@ public class BubbleActivity extends Activity {
 		private boolean isOutOfView() {
 
 			// TODO - Return true if the BubbleView has exited the screen
-			if(mXPos + mDisplayWidth < 0 || mYPos + mDisplayHeight < 0)
+			if (mXPos + mDisplayWidth < 0 || mYPos + mDisplayHeight < 0)
 				return true;
-			if(mXPos > mDisplayWidth || mYPos > mDisplayHeight)
+			if (mXPos > mDisplayWidth || mYPos > mDisplayHeight)
 				return true;
-			
+
 			return false;
 
 		}
