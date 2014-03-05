@@ -248,7 +248,7 @@ public class BubbleActivity extends Activity {
 
 		public BubbleView(Context context, float x, float y) {
 			super(context);
-			log("Creating Bubble at: x:" + x + " y:" + y);
+			Log.d("MINE", "Creating Bubble at: x:" + x + " y:" + y);
 
 			// Create a new random number generator to
 			// randomize size, rotation, speed and direction
