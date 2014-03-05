@@ -110,7 +110,7 @@ public class BubbleActivity extends Activity {
 
 		// TODO - load the sound from res/raw/bubble_pop.wav
 		mSoundID = R.raw.bubble_pop;
-		mSoundPool.load(this, mSoundID, 1);
+		mSoundID = mSoundPool.load(this, mSoundID, 1);
 
 		mAudioManager.setSpeakerphoneOn(true);
 		mAudioManager.loadSoundEffects();
