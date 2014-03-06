@@ -3,6 +3,11 @@ Android Basic Fragment Example
 
 Simple example of a 2d application on android using canvas
 
+Bubbles appear when empty space on screen is clicked.
+If a bubble is touched it disappears and a sound is played.
+
+Finally if a fling gesture is performed bubbles follow the direction of the fling.
+
 [![ScreenShot](https://raw.github.com/joninvski/android_graphics_example/master/images/bubbleYoutubeScreenshot.png)](http://youtu.be/nNqc57o9UCo)
 
 
